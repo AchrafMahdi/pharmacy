@@ -24,16 +24,21 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'phone_number' => ['required', 'string', 'max:15'],
+            'role' => ['sometimes', 'string', 'in:user,admin'] // Role khasso ykoun admin wla user
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'phone_number' => $request->phone_number,
+            'role' => $request->role ?? 'user', // ila ma3tanach role , ghaykoun role dialo user by default
         ]);
 
         event(new Registered($user));
 
+        // automatically login the user wra maydir register
         Auth::login($user);
 
         return response()->noContent();
